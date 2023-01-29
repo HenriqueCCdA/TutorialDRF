@@ -11,6 +11,7 @@ router.register('groups', views.GroupViewSet)
 
 urlpatterns = [
     # path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('', include('tutorial.snippets.urls')),
+    # path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # path('', include('tutorial.snippets.urls')),
+    path('playground/', include('tutorial.playground.urls')),
 ]
