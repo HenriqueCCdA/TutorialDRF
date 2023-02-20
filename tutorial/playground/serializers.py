@@ -1,9 +1,12 @@
+import time
 import re
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 
-from tutorial.playground.models import DataPoint, HighSchore
+from tutorial.playground.models import Album, DataPoint, HighSchore, Track
+
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -200,3 +203,60 @@ class DataPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataPoint
         fields = ['label', 'coordinates']
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    # tracks = serializers.StringRelatedField(many=True)
+    # tracks = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    tracks = serializers.SlugRelatedField(many=True, read_only=True, slug_field='title')
+
+    class Meta:
+        model = Album
+        fields = ['album_name', 'artist', 'tracks']
+
+
+class TrackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Track
+        fields = ['order', 'title', 'duration']
+
+
+class AlbumSerializerV2(serializers.ModelSerializer):
+    tracks = TrackSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Album
+        fields = ['album_name', 'artist', 'tracks']
+
+
+class AlbumSerializerV3(serializers.ModelSerializer):
+    tracks = TrackSerializer(many=True)
+
+    class Meta:
+        model = Album
+        fields = ['album_name', 'artist', 'tracks']
+
+    def create(self, validated_data):
+        tracks_data = validated_data.pop('tracks')
+        album = Album.objects.create(**validated_data)
+
+        tracks_list =[ Track(album=album, **track_data) for track_data in tracks_data]
+
+        Track.objects.bulk_create(tracks_list)
+
+        return album
+
+
+class TrackListingField(serializers.RelatedField):
+
+    def to_representation(self, value):
+        duration = time.strftime('%M:%S', time.gmtime(value.duration))
+        return f"Track {value.order}: {value.title} ({duration})"
+
+
+class AlbumSerializerV4(serializers.ModelSerializer):
+    tracks = TrackListingField(many=True, read_only=True)
+
+    class Meta:
+        model = Album
+        fields = ['album_name', 'artist', 'tracks']

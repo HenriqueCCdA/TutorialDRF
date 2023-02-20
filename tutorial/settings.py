@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # 'tutorial.snippets',
     'tutorial.playground',
     'rest_framework',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
