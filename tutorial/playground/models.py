@@ -1,7 +1,15 @@
-from enum import unique
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
-# Create your models here.
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 
 class HighSchore(models.Model):
@@ -36,3 +44,9 @@ class Track(models.Model):
 
     def __str__(self):
         return f'{self.order}: {self.title}'
+
+
+class CustomerReportRecord(models.Model):
+    time_raised = models.DateTimeField(default=timezone.now, editable=False)
+    reference = models.CharField(unique=True, max_length=20)
+    description = models.TextField()

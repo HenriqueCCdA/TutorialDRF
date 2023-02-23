@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'tutorial.playground',
     'rest_framework',
     'django_extensions',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +137,8 @@ REST_FRAMEWORK = {
     ],
     'NON_FIELD_ERRORS_KEY' :'Erro_global'
 }
+
+
+SHELL_PLUS_IMPORTS = [
+    'from tutorial.playground.serializers import *'
+]

@@ -1,12 +1,15 @@
+from dataclasses import field
 import time
 import re
+from wsgiref.validate import validator
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 
-from tutorial.playground.models import Album, DataPoint, HighSchore, Track
+from tutorial.playground.models import Album, CustomerReportRecord, DataPoint, HighSchore, Track
+from rest_framework.validators import UniqueValidator
 
-
+from tutorial.playground import validators
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -260,3 +263,15 @@ class AlbumSerializerV4(serializers.ModelSerializer):
     class Meta:
         model = Album
         fields = ['album_name', 'artist', 'tracks']
+
+
+class CustimerReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerReportRecord
+        fields = '__all__'
+
+
+class TestMyValidators(serializers.Serializer):
+
+    number = serializers.IntegerField(validators=[validators.even_number])
+    number2 = serializers.IntegerField(validators=[validators.MultipleOf(base=5)])

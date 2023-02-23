@@ -14,97 +14,143 @@ from rest_framework import serializers
 from tutorial.playground.models import HighSchore
 
 from tutorial.playground.serializers import BookSerializer, HighScoreSerializer, UserSerializer
+from tutorial.playground.auth import ExampleAuthentication
+
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 
 from datetime import datetime
 
 
-class UserSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    username = serializers.CharField(max_length=100)
+class CustomAuthToken(ObtainAuthToken):
 
-
-class Comment:
-    def __init__(self, email, content, created=None):
-        self.email = email
-        self.content = content
-        self.created = created or datetime.now()
-
-
-class CommentSerializer(serializers.Serializer):
-    user = UserSerializer()
-    email = serializers.EmailField()
-    content = serializers.CharField(max_length=200)
-    created = serializers.DateTimeField(required=False)
-
-    def create(self, validated_data):
-        return Comment(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.email = validated_data.get('email', instance.email)
-        instance.content = validated_data.get('content', instance.content)
-        instance.created = validated_data.get('created', instance.created)
-        return instance
-
-    def validate_content(self, value):
-
-        if 'django' == value:
-            raise serializers.ValidationError("Erro atributo")
-
-        return value
-
-    def validate(self, data):
-        if data['content'] == 'django2':
-            raise serializers.ValidationError("Error object-level")
-        return data
-
-
-class TestSerizalizer(APIView):
-
-    def post(self, request):
-        serializer = CommentSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
 
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
 
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'email': user.email,
+        })
 
-    def get(self, request):
+class ExampleView(APIView):
+    # authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication,  ExampleAuthentication]
+    authentication_classes = [ExampleAuthentication]
+    permission_classes = [IsAuthenticated]
 
-        books = [
-            {'title': 'oi1', 'author': 'au1'},
-            {'title': 'oi2', 'author': 'au2'},
-        ]
-
-        serializer = BookSerializer(data=books, many=True)
-
-        serializer.is_valid()
-
-        serializer.save()
-        return Response(serializer.data)
-
-
-@api_view(['GET'])
-def high_score(request, pk):
-    instance = HighSchore.objects.get(pk=pk)
-    serializer = HighScoreSerializer(instance)
-    return Response(serializer.data)
-
+    def get(self, request, format=None):
+        content = {
+            'user': str(request.user),
+            'auth': str(request.auth),
+        }
+        return Response(content)
 
 @api_view(['GET'])
-def all_high_scores(request):
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def example_view(request, format=None):
+    content = {
+        "user": str(request.user),
+        "auth": str(request.auth)
+    }
+    return Response(content)
 
-    queryset = HighSchore.objects.order_by('-score')
-    serializer = HighScoreSerializer(queryset, many=True)
-    return Response(serializer.data)
+
+# class UserSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+#     username = serializers.CharField(max_length=100)
 
 
-@api_view(['POST'])
-def high_score_create(request):
-    serializer = HighScoreSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response(serializer.data)
+# class Comment:
+#     def __init__(self, email, content, created=None):
+#         self.email = email
+#         self.content = content
+#         self.created = created or datetime.now()
+
+
+# class CommentSerializer(serializers.Serializer):
+#     user = UserSerializer()
+#     email = serializers.EmailField()
+#     content = serializers.CharField(max_length=200)
+#     created = serializers.DateTimeField(required=False)
+
+#     def create(self, validated_data):
+#         return Comment(**validated_data)
+
+#     def update(self, instance, validated_data):
+#         instance.email = validated_data.get('email', instance.email)
+#         instance.content = validated_data.get('content', instance.content)
+#         instance.created = validated_data.get('created', instance.created)
+#         return instance
+
+#     def validate_content(self, value):
+
+#         if 'django' == value:
+#             raise serializers.ValidationError("Erro atributo")
+
+#         return value
+
+#     def validate(self, data):
+#         if data['content'] == 'django2':
+#             raise serializers.ValidationError("Error object-level")
+#         return data
+
+
+# class TestSerizalizer(APIView):
+
+#     def post(self, request):
+#         serializer = CommentSerializer(data=request.data)
+
+#         serializer.is_valid(raise_exception=True)
+
+#         return Response(serializer.data)
+
+
+#     def get(self, request):
+
+#         books = [
+#             {'title': 'oi1', 'author': 'au1'},
+#             {'title': 'oi2', 'author': 'au2'},
+#         ]
+
+#         serializer = BookSerializer(data=books, many=True)
+
+#         serializer.is_valid()
+
+#         serializer.save()
+#         return Response(serializer.data)
+
+
+# @api_view(['GET'])
+# def high_score(request, pk):
+#     instance = HighSchore.objects.get(pk=pk)
+#     serializer = HighScoreSerializer(instance)
+#     return Response(serializer.data)
+
+
+# @api_view(['GET'])
+# def all_high_scores(request):
+
+#     queryset = HighSchore.objects.order_by('-score')
+#     serializer = HighScoreSerializer(queryset, many=True)
+#     return Response(serializer.data)
+
+
+# @api_view(['POST'])
+# def high_score_create(request):
+#     serializer = HighScoreSerializer(data=request.data)
+#     serializer.is_valid(raise_exception=True)
+#     serializer.save()
+#     return Response(serializer.data)
 
 
 

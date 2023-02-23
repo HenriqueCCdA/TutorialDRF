@@ -1,5 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.authtoken.views import obtain_auth_token
 
 from . import views
 
@@ -15,10 +16,11 @@ urlpatterns = [
     # path('', views.ExampleView.as_view())
     # path('', views.MinhaView.as_view())
     # path('', views.TestSerizalizer.as_view())
-    path('high-score/<int:pk>/', views.high_score),
-    path('high-score-list/', views.all_high_scores),
-    path('high-score-add/', views.high_score_create)
-
+    # path('high-score/<int:pk>/', views.high_score),
+    # path('high-score-list/', views.all_high_scores),
+    # path('high-score-add/', views.high_score_create)
+    path('auth/', views.ExampleView.as_view()),
+    path('api-token-auth/', views.CustomAuthToken.as_view())
 ]
 
 # urlpatterns = [
