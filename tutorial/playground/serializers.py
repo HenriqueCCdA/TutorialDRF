@@ -1,4 +1,4 @@
-from dataclasses import field
+from dataclasses import field, fields
 import time
 import re
 from wsgiref.validate import validator
@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 
-from tutorial.playground.models import Album, CustomerReportRecord, DataPoint, HighSchore, Track
+from tutorial.playground.models import Album, CustomerReportRecord, DataPoint, HighSchore, Purchase, Track
 from rest_framework.validators import UniqueValidator
 
 from tutorial.playground import validators
@@ -275,3 +275,10 @@ class TestMyValidators(serializers.Serializer):
 
     number = serializers.IntegerField(validators=[validators.even_number])
     number2 = serializers.IntegerField(validators=[validators.MultipleOf(base=5)])
+
+
+class PurchaseSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Purchase
+        fields = ('user',)

@@ -1,6 +1,8 @@
-from django.urls import path
+from pydoc import visiblename
+from django.urls import path, re_path
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from rest_framework.authtoken.views import obtain_auth_token
+
 
 from . import views
 
@@ -20,7 +22,16 @@ urlpatterns = [
     # path('high-score-list/', views.all_high_scores),
     # path('high-score-add/', views.high_score_create)
     path('auth/', views.ExampleView.as_view()),
-    path('api-token-auth/', views.CustomAuthToken.as_view())
+    path('cache/', views.PostView.as_view()),
+    path('throttle/', views.ThrottleView.as_view()),
+    path('api-token-auth/', views.CustomAuthToken.as_view()),
+    path('purchase/<username>/', views.PurchaseList.as_view()),
+    path('purchase/', views.PurchaseList.as_view()),
+    path('user/', views.UserListView.as_view()),
+    path('version/', views.APIVersion.as_view(), name='version'),
+    path('negotiation/', views.NoNegotiationView.as_view()),
+    path('metadata/', views.APIRoot.as_view()),
+    path('error/', views.ErrorView.as_view()),
 ]
 
 # urlpatterns = [

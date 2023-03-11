@@ -12,6 +12,20 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
+class Purchase(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        ordering = ('user',)
+
+
+    def __str__(self):
+        return self.user
+
+class Blocklist(models.Model):
+    ip_addr = models.GenericIPAddressField()
+
+
 class HighSchore(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     player_name = models.CharField(max_length=10)

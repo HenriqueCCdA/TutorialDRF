@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-2dir!+)f9$z+y^g)d5snkgw=lr1m_31@um)d1=2yd2u=_2$(+h
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     'rest_framework.authtoken',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -135,7 +136,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],
-    'NON_FIELD_ERRORS_KEY' :'Erro_global'
+    'NON_FIELD_ERRORS_KEY' :'Erro_global',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'ALLOWED_VERSIONS': ('v1', 'v2'),
+    'EXCEPTION_HANDLER': 'tutorial.playground.views.custom_exception_handler'
 }
 
 
