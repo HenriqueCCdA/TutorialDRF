@@ -32,6 +32,8 @@ urlpatterns = [
     path('negotiation/', views.NoNegotiationView.as_view()),
     path('metadata/', views.APIRoot.as_view()),
     path('error/', views.ErrorView.as_view()),
+    path('profile/', views.ProfileList.as_view(), name="profile-list"),
+    path('profile/<int:pk>/', views.ProfileDetail.as_view(), name="profile-detail"),
 ]
 
 # urlpatterns = [

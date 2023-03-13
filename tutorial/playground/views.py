@@ -9,13 +9,14 @@ from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework import viewsets
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from rest_framework.parsers import JSONParser, BaseParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework import serializers
-from tutorial.playground.models import Blocklist, HighSchore, Purchase
+from yaml import serialize
+from tutorial.playground.models import Blocklist, HighSchore, Profile, Purchase
 
-from tutorial.playground.serializers import BookSerializer, HighScoreSerializer, PurchaseSerializer, UserSerializer
+from tutorial.playground.serializers import BookSerializer, HighScoreSerializer, ProfileSerializer, PurchaseSerializer, UserSerializer
 from tutorial.playground.auth import ExampleAuthentication
 
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
@@ -44,6 +45,8 @@ from rest_framework.metadata import BaseMetadata
 from rest_framework.reverse import reverse, reverse_lazy
 from rest_framework.views import exception_handler
 from rest_framework import status
+from rest_framework.renderers import TemplateHTMLRenderer
+
 
 from datetime import datetime
 
@@ -131,6 +134,33 @@ class CustomAuthToken(ObtainAuthToken):
         })
 
 class MyError(Exception): ...
+
+
+class ProfileDetail(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'profile_detail.html'
+
+    def get(self, request, pk):
+        profile = get_object_or_404(Profile, pk=pk)
+        serializer = ProfileSerializer(profile)
+        return Response({'serializer': serializer, 'profile': profile})
+
+    def post(self, request, pk):
+        profile = get_object_or_404(Profile, pk=pk)
+        serializer = ProfileSerializer(profile, data=request.data)
+        if not serializer.is_valid():
+            return Response({'serializer': serializer, 'profile': profile})
+        serializer.save()
+        return redirect('profile-list')
+
+
+class ProfileList(APIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'profile_list.html'
+
+    def get(self, request):
+        queryset = Profile.objects.all()
+        return Response({'profiles': queryset})
 
 
 class ErrorView(APIView):

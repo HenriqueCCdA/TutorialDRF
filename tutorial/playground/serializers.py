@@ -6,11 +6,16 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 
-from tutorial.playground.models import Album, CustomerReportRecord, DataPoint, HighSchore, Purchase, Track
+from tutorial.playground.models import Album, CustomerReportRecord, DataPoint, HighSchore, Profile, Purchase, Track
 from rest_framework.validators import UniqueValidator
 
 from tutorial.playground import validators
 
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('id', 'name',)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
